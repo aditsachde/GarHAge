@@ -30,8 +30,8 @@ IPAddress subnet(SUBNET);
 
 const char* mqtt_broker = MQTT_BROKER;
 const char* mqtt_clientId = MQTT_CLIENTID;
-// const char* mqtt_username = MQTT_USERNAME;
-// const char* mqtt_password = MQTT_PASSWORD;
+const char* mqtt_username = MQTT_USERNAME;
+const char* mqtt_password = MQTT_PASSWORD;
 
 const boolean activeHighRelay = ACTIVE_HIGH_RELAY;
 
@@ -48,7 +48,7 @@ int door1_lastStatusValue = 2;
 unsigned long door1_lastSwitchTime = 0;
 int debounceTime = 2000;
 unsigned long lastClickTime = 0;
-int lockOutTime = 10000;    // <--- in milliseconds
+int lockOutTime = 14000;    // <--- in milliseconds
 
 String availabilityBase = MQTT_CLIENTID;
 String availabilitySuffix = "/availability";
@@ -146,21 +146,6 @@ void triggerDoorAction(String requestedDoor, String requestedAction) {
     Serial.println(" TOGGLE door!");
     toggleRelay(door1_openPin);
   }
-/*
-  else if (requestedDoor == mqtt_door1_action_topic && requestedAction == "CLOSE") {
-    Serial.print("Triggering ");
-    Serial.print(door1_alias);
-    Serial.println(" CLOSE relay!");
-    toggleRelay(door1_closePin);
-  }
-  else if (requestedDoor == mqtt_door1_action_topic && requestedAction == "STATE") {
-    Serial.print("Publishing on-demand status update for ");
-    Serial.print(door1_alias);
-    Serial.println("!");
-    publish_birth_message();
-    publish_door1_status();
-  }
-  */ 
   else { Serial.println("Unrecognized action payload... taking no action!");
   }
 }
@@ -184,8 +169,6 @@ void reconnect() {
       Serial.println("...");
       client.subscribe(mqtt_door1_action_topic);
       
-      // Publish the current door status on connect/reconnect to ensure status is synced with whatever happened while disconnected
-
     } 
     else {
       Serial.print("failed, rc=");
@@ -218,8 +201,6 @@ void setup() {
   pinMode(door1_statusPin, INPUT_PULLUP);
   // Update variable with current door state
   door1_lastStatusValue = digitalRead(door1_statusPin);
-
-  }
 
   // Setup serial output, connect to wifi, connect to MQTT broker, set MQTT message callback
   Serial.begin(115200);
