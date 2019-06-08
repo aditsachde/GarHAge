@@ -47,6 +47,8 @@ const int relayActiveTime = 500;
 int door1_lastStatusValue = 2;
 unsigned long door1_lastSwitchTime = 0;
 int debounceTime = 2000;
+unsigned long lastClickTime = 0;
+int lockOutTime = 10000;    // <--- in milliseconds
 
 String availabilityBase = MQTT_CLIENTID;
 String availabilitySuffix = "/availability";
@@ -99,7 +101,12 @@ void callback(char* topic, byte* payload, unsigned int length) {
   String topicToProcess = topic;
   payload[length] = '\0';
   String payloadToProcess = (char*)payload;
-  triggerDoorAction(topicToProcess, payloadToProcess);
+
+  unsigned int currentTime = millis();
+  if (currentTime - lastClickTime >= lockOutTime) {
+    triggerDoorAction(topicToProcess, payloadToProcess);
+    lastClickTime = currentTime;
+  }
 }
 
 // Function that publishes birthMessage
